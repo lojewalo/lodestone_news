@@ -2,6 +2,7 @@
 name = "lodestone_news"
 version = "0.1.0"
 dependencies = [
+ "ansi_term 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "chan 0.1.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ctrlc 3.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -9,6 +10,7 @@ dependencies = [
  "diesel_codegen 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fern 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper 0.11.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper-rustls 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -25,6 +27,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "memchr 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "ansi_term"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "backtrace"
@@ -305,6 +312,14 @@ version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "backtrace 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "fern"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "log 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1118,6 +1133,7 @@ dependencies = [
 
 [metadata]
 "checksum aho-corasick 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)" = "500909c4f87a9e52355b26626d890833e9e1d53ac566db76c36faa984b889699"
+"checksum ansi_term 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)" = "6b3568b48b7cefa6b8ce125f9bb4989e52fbcc29ebea88df04cc7c5f12f70455"
 "checksum backtrace 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "99f2ce94e22b8e664d95c57fff45b98a966c2252b60691d0b7aeeccd88d70983"
 "checksum backtrace-sys 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)" = "c63ea141ef8fdb10409d0f5daf30ac51f84ef43bff66f16627773d2a292cd189"
 "checksum base64 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "96434f987501f0ed4eb336a411e0631ecd1afa11574fe148587adc4ff96143c9"
@@ -1153,6 +1169,7 @@ dependencies = [
 "checksum encoding_index_tests 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "a246d82be1c9d791c5dfde9a2bd045fc3cbba3fa2b11ad558f27d01712f00569"
 "checksum error-chain 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d9435d864e017c3c6afeac1654189b06cdb491cf2ff73dbf0d73b0f292f42ff8"
 "checksum error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ff511d5dc435d703f4971bc399647c9bc38e20cb41452e3b9feb4765419ed3f3"
+"checksum fern 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)" = "1f0297637852905c7ce4cefd8d8a6719f6e3cfb22e2e9f0aa0650f4804a6f360"
 "checksum fnv 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)" = "6cc484842f1e2884faf56f529f960cc12ad8c71ce96cc7abba0a067c98fee344"
 "checksum fuchsia-zircon 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f6c0581a4e363262e52b87f59ee2afe3415361c6ec35e665924eb08afe8ff159"
 "checksum fuchsia-zircon-sys 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "43f3795b4bae048dc6123a6b972cadde2e676f9ded08aef6bb77f5f157684a82"

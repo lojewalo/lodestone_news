@@ -39,6 +39,7 @@ impl NewsScraper {
   }
 
   pub fn insert_new_news(items: Vec<NewNewsItem>) -> Result<()> {
+    info!("Checking for new items");
     let new_ids: Vec<String> = items.iter().map(|x| x.lodestone_id.to_string()).collect();
     let existing_ids: Vec<String> = ::CONNECTION.with(|c| {
       use database::schema::news_items;
@@ -51,6 +52,7 @@ impl NewsScraper {
       .filter(|x| !existing_ids.contains(&x.lodestone_id))
       .collect();
     if new_items.is_empty() {
+      info!("No new items found");
       return Ok(());
     }
     ::CONNECTION.with(|c| {
@@ -60,10 +62,12 @@ impl NewsScraper {
         .execute(c)
         .chain_err(|| "could not insert new items")
     })?;
+    info!("Added {} new item{}", new_items.len(), if new_items.len() == 1 { "" } else { "s" });
     Ok(())
   }
 
   pub fn download_news(&self) -> Result<String> {
+    info!("Downloading news");
     let mut response = self.client.get(NEWS_URL).send().chain_err(|| "could not download news")?;
 
     let mut content = String::new();
@@ -72,6 +76,7 @@ impl NewsScraper {
   }
 
   pub fn parse_news(&self, news: &str) -> Vec<NewNewsItem> {
+    info!("Parsing news");
     let html = Html::parse_document(news);
     let special_notices_selector = Selector::parse("div.news__content.parts__space--add > ul:nth-of-type(1) > li").unwrap();
     let news_selector = Selector::parse("div.news__content.parts__space--add > ul:nth-of-type(2) > li").unwrap();

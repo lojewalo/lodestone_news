@@ -49,6 +49,7 @@ impl DiscordSender {
     let mut successful_sends = Vec::new();
 
     for (server, item) in to_send {
+      info!("Sending {} ({}) to {} ({})", item.title, item.id, server.title, server.id);
       let mut embed = json!({
         "type": "rich",
         "timestamp": Utc.timestamp(item.created.timestamp(), 0).to_rfc3339(),

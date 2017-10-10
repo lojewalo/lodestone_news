@@ -20,11 +20,14 @@ extern crate log;
 extern crate ctrlc;
 #[macro_use]
 extern crate chan;
+extern crate fern;
+extern crate ansi_term;
 
 pub mod database;
 pub mod lodestone;
 pub mod discord;
 pub mod errors;
+pub mod logging;
 
 use errors::*;
 
@@ -49,16 +52,26 @@ thread_local! {
 }
 
 fn main() {
+  logging::init_logger().expect("Could not initialize logger");
+
+  info!("Loading .env");
+
   dotenv::dotenv().ok();
+
+  info!("Creating channels and tickers");
 
   let (ts_tx, ts_rx) = async();
   let ns_tick = tick(Duration::seconds(150).to_std().unwrap());
   let ds_tick = tick(Duration::minutes(5).to_std().unwrap());
 
+  info!("Setting Ctrl-C handler");
+
   ctrlc::set_handler(move || {
     ts_tx.send(());
     ts_tx.send(());
   }).unwrap();
+
+  info!("Starting scraper thread");
 
   let ns_ts_rx = ts_rx.clone();
   let news_scraper_handle = ::std::thread::spawn(move || {
@@ -74,6 +87,8 @@ fn main() {
     }
   });
 
+  info!("Starting Discord thread");
+
   let discord_sender_handle = ::std::thread::spawn(move || {
     let ds = discord::DiscordSender::new();
     loop {
@@ -87,6 +102,10 @@ fn main() {
     }
   });
 
+  info!("Waiting on joins");
+
   news_scraper_handle.join().unwrap();
   discord_sender_handle.join().unwrap();
+
+  info!("Done");
 }
