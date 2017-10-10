@@ -45,7 +45,7 @@ pub fn init_logger() -> Result<()> {
                               colored_target(record.target()),
                               message))
     })
-    .level(if var("LB_DEBUG").is_ok() { LogLevelFilter::Debug } else { LogLevelFilter::Info })
+    .level(if var("LN_DEBUG").is_ok() { LogLevelFilter::Debug } else { LogLevelFilter::Info })
     .chain(io::stdout())
     .apply()
     .chain_err(|| "could not set up logger")
