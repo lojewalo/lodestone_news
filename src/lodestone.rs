@@ -13,7 +13,7 @@ use chrono::NaiveDateTime;
 
 use std::io::Read;
 
-const NEWS_URL: &'static str = "http://na.finalfantasyxiv.com/lodestone/news/";
+const NEWS_URL: &'static str = "https://na.finalfantasyxiv.com/lodestone/news/";
 
 pub struct NewsScraper {
   client: Client<HttpsConnector>
