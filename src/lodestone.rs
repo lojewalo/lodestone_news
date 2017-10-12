@@ -98,7 +98,7 @@ impl NewsScraper {
       let child = match child {
         Some(c) => c,
         None => {
-          println!("could not get news item child");
+          warn!("could not get news item child");
           continue
         }
       };
@@ -106,7 +106,7 @@ impl NewsScraper {
       let href = match child.attr("href") {
         Some(h) => h,
         None => {
-          println!("invalid link in news item");
+          warn!("invalid link in news item");
           continue;
         }
       };
@@ -116,7 +116,7 @@ impl NewsScraper {
           let title = match li.select(&title_selector).next() {
             Some(t) => t,
             None => {
-              println!("missing title in news item");
+              warn!("missing title in news item");
               continue;
             }
           };
@@ -143,7 +143,7 @@ impl NewsScraper {
           match text {
             Some(t) => (t, None),
             None => {
-              println!("invalid topic/special notice: no title");
+              warn!("invalid topic/special notice: no title");
               continue;
             }
           }
@@ -153,7 +153,7 @@ impl NewsScraper {
       let time_script = match li.select(&time_script_selector).next() {
         Some(ts) => ts,
         None => {
-          println!("news item missing time script");
+          warn!("news item missing time script");
           continue
         }
       };
@@ -162,14 +162,14 @@ impl NewsScraper {
       let time_string = match time_script.split("strftime(").nth(1).and_then(|v| v.split(',').next()) {
         Some(time) => time,
         None => {
-          println!("invalid script in news item");
+          warn!("invalid script in news item");
           continue
         }
       };
       let time: i64 = match time_string.parse() {
         Ok(t) => t,
         Err(_) => {
-          println!("invalid time in time script");
+          warn!("invalid time in time script");
           continue
         }
       };
@@ -178,7 +178,7 @@ impl NewsScraper {
       let id = match href.split('/').last() {
         Some(i) => i,
         None => {
-          println!("invalid href in news item");
+          warn!("invalid href in news item");
           continue;
         }
       };
