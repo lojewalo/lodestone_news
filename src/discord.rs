@@ -4,7 +4,7 @@ use database::models::server::Server;
 
 use errors::*;
 
-use chrono::{Utc, TimeZone, Duration};
+use chrono::{Utc, Duration, DateTime};
 
 use diesel::prelude::*;
 use diesel::expression::sql;
@@ -52,7 +52,7 @@ impl DiscordSender {
       info!("Sending {} ({}) to {} ({})", item.title, item.id, server.title, server.id);
       let mut embed = json!({
         "type": "rich",
-        "timestamp": Utc.timestamp(item.created.timestamp(), 0).to_rfc3339(),
+        "timestamp": DateTime::<Utc>::from_utc(item.created, Utc).to_rfc3339(),
         "fields": [
           {
             "name": "Title",
