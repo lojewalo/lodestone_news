@@ -12,6 +12,14 @@ macro_rules! insertable {
     pub struct $new_name {
       $(pub $field_name: $kind),+
     }
+
+    impl $name {
+      pub fn into_new(self) -> $new_name {
+        $new_name {
+          $($field_name: self.$field_name),+
+        }
+      }
+    }
   }
 }
 
