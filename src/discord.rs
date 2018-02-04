@@ -7,8 +7,8 @@ use errors::*;
 use chrono::{Utc, Duration, DateTime};
 
 use diesel::prelude::*;
-use diesel::expression::sql;
-use diesel::insert;
+use diesel::dsl::sql;
+use diesel::insert_into;
 
 use make_hyper_great_again::Client;
 use hyper_rustls::HttpsConnector;
@@ -53,17 +53,11 @@ impl DiscordSender {
       let mut embed = json!({
         "type": "rich",
         "timestamp": DateTime::<Utc>::from_utc(item.created, Utc).to_rfc3339(),
+        "color": item.kind.color(item.tag.as_ref()),
+        "title": item.title,
+        "url": item.url,
+        "description": item.description,
         "fields": [
-          {
-            "name": "Title",
-            "value": item.title,
-            "inline": false
-          },
-          {
-            "name": "Link",
-            "value": item.url,
-            "inline": false
-          },
           {
             "name": "Kind",
             "value": item.kind.to_string(),
@@ -71,6 +65,11 @@ impl DiscordSender {
           }
         ]
       });
+      if let Some(ref image) = item.image {
+        embed["image"] = json!({
+          "url": image
+        });
+      }
       if let Some(ref tag) = item.tag {
         embed["fields"].as_array_mut().unwrap().push(json!({
           "name": "Tag",
@@ -112,8 +111,8 @@ impl DiscordSender {
 
     ::CONNECTION.with(|c| {
       use database::schema::send_records;
-      insert(&successful_sends)
-        .into(send_records::table)
+      insert_into(send_records::table)
+        .values(&successful_sends)
         .execute(c)
         .chain_err(|| "could not update send records")
     })?;
