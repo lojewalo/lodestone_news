@@ -12,8 +12,6 @@ extern crate dotenv;
 #[macro_use]
 extern crate diesel;
 #[macro_use]
-extern crate diesel_codegen;
-#[macro_use]
 extern crate error_chain;
 #[macro_use]
 extern crate log;
@@ -23,6 +21,7 @@ extern crate chan_signal;
 extern crate bus;
 extern crate fern;
 extern crate ansi_term;
+extern crate itertools;
 
 pub mod database;
 pub mod lodestone;

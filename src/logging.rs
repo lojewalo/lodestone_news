@@ -1,18 +1,18 @@
 use ansi_term::Colour;
 use fern;
-use log::{LogLevel, LogLevelFilter};
+use log::{Level, LevelFilter};
 use std::io;
 use chrono;
 use std::env::var;
 
 use errors::*;
 
-fn colored_level(level: LogLevel) -> String {
+fn colored_level(level: Level) -> String {
   let color = match level {
-    LogLevel::Trace => Colour::Fixed(8),
-    LogLevel::Info => Colour::Blue,
-    LogLevel::Warn => Colour::Yellow,
-    LogLevel::Error => Colour::Red,
+    Level::Trace => Colour::Fixed(8),
+    Level::Info => Colour::Blue,
+    Level::Warn => Colour::Yellow,
+    Level::Error => Colour::Red,
     _ => return level.to_string()
   };
   color.paint(level.to_string()).to_string()
@@ -45,7 +45,7 @@ pub fn init_logger() -> Result<()> {
                               colored_target(record.target()),
                               message))
     })
-    .level(if var("LN_DEBUG").is_ok() { LogLevelFilter::Debug } else { LogLevelFilter::Info })
+    .level(if var("LN_DEBUG").is_ok() { LevelFilter::Debug } else { LevelFilter::Info })
     .chain(io::stdout())
     .apply()
     .chain_err(|| "could not set up logger")

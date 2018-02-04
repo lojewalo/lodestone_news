@@ -1,8 +1,11 @@
 use database::schema::*;
 
+use std::borrow::Borrow;
 use std::error::Error;
 
-use diesel::types::{FromSql, FromSqlRow, HasSqlType, SmallInt};
+use diesel::Queryable;
+use diesel::types::{FromSql, FromSqlRow, HasSqlType};
+use diesel::sql_types::SmallInt;
 use diesel::expression::AsExpression;
 use diesel::expression::helper_types::AsExprOf;
 use diesel::backend::Backend;
@@ -21,6 +24,8 @@ insertable! {
   pub struct NewNewsItem {
     pub title: String,
     pub url: String,
+    pub description: Option<String>,
+    pub image: Option<String>,
     pub lodestone_id: String,
     pub kind: NewsKind,
     pub created: NaiveDateTime,
@@ -52,6 +57,23 @@ impl NewsKind {
       _ => None
     }
   }
+
+  pub fn color<S: Borrow<String>>(&self, tag: Option<S>) -> Option<u32> {
+    if let Some(tag) = tag {
+      match tag.borrow().to_lowercase().as_str() {
+        "maintenance" => return 0xd3730c.into(),
+        "important" => return 0xd30c0c.into(),
+        "recovery" => return 0x34d30c.into(),
+        "follow-up" => return 0x0c80d3.into(),
+        _ => {}
+      }
+    }
+    match *self {
+      NewsKind::News => None,
+      NewsKind::SpecialNotice => 0x0cd3cd.into(),
+      NewsKind::Topic => 0x620cd3.into(),
+    }
+  }
 }
 
 impl ToString for NewsKind {
@@ -61,6 +83,17 @@ impl ToString for NewsKind {
       NewsKind::Topic => "Topic",
       NewsKind::SpecialNotice => "Special notice"
     }.to_string()
+  }
+}
+
+impl<DB> Queryable<SmallInt, DB> for NewsKind
+  where DB: Backend + HasSqlType<SmallInt>,
+        NewsKind: FromSql<SmallInt, DB>
+{
+  type Row = Self;
+
+  fn build(row: Self::Row) -> Self {
+    row
   }
 }
 
