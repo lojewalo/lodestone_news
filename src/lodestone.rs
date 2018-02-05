@@ -13,8 +13,6 @@ use diesel::prelude::*;
 
 use chrono::NaiveDateTime;
 
-use itertools::Itertools;
-
 use std::io::Read;
 
 const NEWS_URL: &'static str = "https://na.finalfantasyxiv.com/lodestone/news/";
