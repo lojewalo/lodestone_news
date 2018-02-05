@@ -22,7 +22,6 @@ extern crate chan_signal;
 extern crate bus;
 extern crate fern;
 extern crate ansi_term;
-extern crate itertools;
 
 pub mod iter;
 pub mod database;
