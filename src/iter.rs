@@ -1,4 +1,4 @@
-use scraper::{Html, Selector, Node};
+use scraper::Node;
 use ego_tree::iter::{Traverse, Edge};
 
 #[derive(Debug, Clone)]
