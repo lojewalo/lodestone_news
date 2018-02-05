@@ -1,3 +1,5 @@
+use iter::LineBreakText;
+
 use make_hyper_great_again::Client;
 
 use scraper::{Html, Selector, ElementRef};
@@ -148,8 +150,7 @@ impl NewsScraper {
             .and_then(|e| e.value().attr("src"))
             .map(ToString::to_string);
           let description = li.select(&second_para_selector).next()
-            .map(|v| v.text().intersperse(" ").collect::<String>())
-            .map(|s| s.split(' ').filter(|x| !x.is_empty()).join(" "));
+            .map(|v| LineBreakText::new(v.traverse(), " ").collect());
           match text {
             Some(t) => (t, None, image, description),
             None => {
