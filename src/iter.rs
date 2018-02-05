@@ -2,14 +2,14 @@ use scraper::{Html, Selector, Node};
 use ego_tree::iter::{Traverse, Edge};
 
 #[derive(Debug, Clone)]
-struct LineBreakText<'a> {
+pub struct LineBreakText<'a> {
   inner: Traverse<'a, Node>,
   separator: &'a str,
   skipping: bool
 }
 
 impl<'a> LineBreakText<'a> {
-  fn new(inner: Traverse<'a, Node>, separator: &'a str) -> Self {
+  pub fn new(inner: Traverse<'a, Node>, separator: &'a str) -> Self {
     LineBreakText {
       inner,
       separator,
