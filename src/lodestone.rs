@@ -1,3 +1,5 @@
+use iter::NewsText;
+
 use make_hyper_great_again::Client;
 
 use scraper::{Html, Selector, ElementRef};
@@ -10,8 +12,6 @@ use errors::*;
 use diesel::prelude::*;
 
 use chrono::NaiveDateTime;
-
-use itertools::Itertools;
 
 use std::io::Read;
 
@@ -148,8 +148,7 @@ impl NewsScraper {
             .and_then(|e| e.value().attr("src"))
             .map(ToString::to_string);
           let description = li.select(&second_para_selector).next()
-            .map(|v| v.text().intersperse(" ").collect::<String>())
-            .map(|s| s.split(' ').filter(|x| !x.is_empty()).join(" "));
+            .map(|v| NewsText::new(v.traverse(), " ").collect());
           match text {
             Some(t) => (t, None, image, description),
             None => {

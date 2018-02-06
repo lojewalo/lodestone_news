@@ -7,6 +7,7 @@ extern crate make_hyper_great_again;
 #[macro_use]
 extern crate serde_json;
 extern crate scraper;
+extern crate ego_tree;
 extern crate chrono;
 extern crate dotenv;
 #[macro_use]
@@ -21,8 +22,8 @@ extern crate chan_signal;
 extern crate bus;
 extern crate fern;
 extern crate ansi_term;
-extern crate itertools;
 
+pub mod iter;
 pub mod database;
 pub mod lodestone;
 pub mod discord;
