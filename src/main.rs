@@ -1,9 +1,7 @@
 #![feature(box_syntax)]
 #![recursion_limit = "1024"]
 
-extern crate hyper;
-extern crate hyper_rustls;
-extern crate make_hyper_great_again;
+extern crate reqwest;
 #[macro_use]
 extern crate serde_json;
 extern crate scraper;

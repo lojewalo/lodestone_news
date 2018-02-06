@@ -10,15 +10,14 @@ use diesel::prelude::*;
 use diesel::dsl::sql;
 use diesel::insert_into;
 
-use make_hyper_great_again::Client;
-use hyper_rustls::HttpsConnector;
-use hyper::header::ContentType;
+use reqwest::Client;
+use reqwest::header::ContentType;
 
 use std::thread::sleep;
 use std::io::Read;
 
 pub struct DiscordSender {
-  client: Client<HttpsConnector>
+  client: Client
 }
 
 impl Default for DiscordSender {
@@ -30,7 +29,7 @@ impl Default for DiscordSender {
 impl DiscordSender {
   pub fn new() -> Self {
     DiscordSender {
-      client: Client::create_connector(|c| HttpsConnector::new(4, &c.handle())).unwrap()
+      client: Client::new()
     }
   }
 

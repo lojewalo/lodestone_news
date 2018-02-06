@@ -4,9 +4,7 @@ version = "0.1.0"
 authors = ["Kyle Clemens <jkc.clemens@gmail.com>"]
 
 [dependencies]
-hyper = "0.11"
-hyper-rustls = "0.12"
-make_hyper_great_again = "0.11"
+reqwest = "0.8"
 serde = "1.0"
 serde_json = "1.0"
 dotenv = "0.10"

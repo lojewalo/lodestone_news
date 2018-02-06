@@ -1,10 +1,8 @@
 use iter::NewsText;
 
-use make_hyper_great_again::Client;
+use reqwest::Client;
 
 use scraper::{Html, Selector, ElementRef};
-
-use hyper_rustls::HttpsConnector;
 
 use database::models::news_item::{NewsKind, NewNewsItem};
 use errors::*;
@@ -18,7 +16,7 @@ use std::io::Read;
 const NEWS_URL: &'static str = "https://na.finalfantasyxiv.com/lodestone/news/";
 
 pub struct NewsScraper {
-  client: Client<HttpsConnector>
+  client: Client
 }
 
 impl Default for NewsScraper {
@@ -30,7 +28,7 @@ impl Default for NewsScraper {
 impl NewsScraper {
   pub fn new() -> Self {
     NewsScraper {
-      client: Client::create_connector(|c| HttpsConnector::new(4, &c.handle())).unwrap()
+      client: Client::new()
     }
   }
 
