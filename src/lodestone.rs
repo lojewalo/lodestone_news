@@ -1,4 +1,4 @@
-use iter::LineBreakText;
+use iter::NewsText;
 
 use make_hyper_great_again::Client;
 
@@ -148,7 +148,7 @@ impl NewsScraper {
             .and_then(|e| e.value().attr("src"))
             .map(ToString::to_string);
           let description = li.select(&second_para_selector).next()
-            .map(|v| LineBreakText::new(v.traverse(), " ").collect());
+            .map(|v| NewsText::new(v.traverse(), " ").collect());
           match text {
             Some(t) => (t, None, image, description),
             None => {
