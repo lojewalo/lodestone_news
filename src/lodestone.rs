@@ -8,8 +8,11 @@ use database::models::news_item::{NewsKind, NewNewsItem};
 use errors::*;
 
 use diesel::prelude::*;
+use diesel::dsl::count;
 
 use chrono::NaiveDateTime;
+
+use serde_json;
 
 use std::io::Read;
 
@@ -113,7 +116,34 @@ impl NewsScraper {
         }
       };
 
-      let (title, tag, image, description) = match kind {
+      let url = format!("https://na.finalfantasyxiv.com{}", href);
+
+      let id = match href.split('/').last() {
+        Some(i) => i,
+        None => {
+          warn!("invalid href in news item");
+          continue;
+        }
+      };
+
+      let count: Result<i64> = ::CONNECTION.with(|c| {
+        use database::schema::news_items;
+        news_items::table.select(count(news_items::id))
+          .filter(news_items::lodestone_id.eq(&id))
+          .first(c)
+          .chain_err(|| "could not load existing ids")
+      });
+
+      match count {
+        Ok(i) if i > 0 => continue,
+        Err(e) => {
+          warn!("could not check if id was in database: {}", e);
+          continue;
+        },
+        _ => {}
+      }
+
+      let (title, tag, image, description, fields) = match kind {
         NewsKind::News | NewsKind::SpecialNotice => {
           let title = match li.select(&title_selector).next() {
             Some(t) => t,
@@ -135,7 +165,23 @@ impl NewsScraper {
             text_iter.collect()
           };
 
-          (title, tag, None, None)
+          let (desc, fields) = match self.parse_news_fields(&url) {
+            Ok(x) => x,
+            Err(e) => {
+              warn!("could not parse fields: {}", e);
+              continue;
+            }
+          };
+
+          let fields = match serde_json::to_string(&fields).chain_err(|| "could not serialize") {
+            Ok(f) => f,
+            Err(e) => {
+              warn!("could not parse/serialize fields: {}", e);
+              continue;
+            }
+          };
+
+          (title, tag, None, desc, Some(fields))
         },
         NewsKind::Topic => {
           let text = li.select(&title_selector).next()
@@ -148,7 +194,7 @@ impl NewsScraper {
           let description = li.select(&second_para_selector).next()
             .map(|v| NewsText::new(v.traverse(), " ").collect());
           match text {
-            Some(t) => (t, None, image, description),
+            Some(t) => (t, None, image, description, None),
             None => {
               warn!("invalid topic/special notice: no title");
               continue;
@@ -182,19 +228,12 @@ impl NewsScraper {
       };
       let datetime = NaiveDateTime::from_timestamp(time, 0);
 
-      let id = match href.split('/').last() {
-        Some(i) => i,
-        None => {
-          warn!("invalid href in news item");
-          continue;
-        }
-      };
-
       let news_item = NewNewsItem {
         title: title.trim().to_string(),
-        url: format!("http://na.finalfantasyxiv.com{}", href),
+        url,
         image,
         description,
+        fields,
         lodestone_id: id.to_string(),
         kind,
         created: datetime,
@@ -205,4 +244,49 @@ impl NewsScraper {
 
     items
   }
+
+  fn parse_news_fields(&self, url: &str) -> Result<(Option<String>, Vec<Field>)> {
+    let mut response = self.client.get(url).send().chain_err(|| "could not download news item")?;
+    let mut content = String::new();
+    response.read_to_string(&mut content).chain_err(|| "could not read news item")?;
+
+    let detail_selector = Selector::parse("div.news__detail__wrapper").unwrap();
+
+    let html = Html::parse_document(&content);
+    let content = html.select(&detail_selector).next().chain_err(|| "no content")?;
+    let text: String = NewsText::new(content.traverse(), "\n").collect();
+
+    let mut fields = Vec::new();
+    let mut title: Option<&str> = None;
+    let mut value = String::new();
+
+    let desc = text.split('\n').next().map(|x| x.trim().to_string());
+
+    for line in text.split('\n') {
+      let line = line.trim();
+      if let Some(t) = title {
+        if line.is_empty() {
+          title = None;
+          if !value.is_empty() {
+            fields.push(Field { name: t.to_string(), value: value.trim().to_string() });
+            value.clear();
+          }
+          continue;
+        }
+        value.push_str(line);
+        value.push_str("\n");
+      }
+      if !line.starts_with('[') || !line.ends_with(']') {
+        continue;
+      }
+      title = Some(&line[1..line.len() - 1]);
+    }
+    Ok((desc, fields))
+  }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Field {
+  pub name: String,
+  pub value: String
 }

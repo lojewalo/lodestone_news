@@ -13,6 +13,8 @@ use diesel::insert_into;
 use reqwest::Client;
 use reqwest::header::ContentType;
 
+use serde_json;
+
 use std::thread::sleep;
 use std::io::Read;
 
@@ -56,19 +58,23 @@ impl DiscordSender {
         "title": item.title,
         "url": item.url,
         "description": item.description,
-        "fields": [
-          {
-            "name": "Kind",
-            "value": item.kind.to_string(),
-            "inline": true
-          }
-        ]
+        "fields": []
       });
       if let Some(ref image) = item.image {
         embed["image"] = json!({
           "url": image
         });
       }
+      if let Some(ref fields) = item.fields {
+        if let Ok(f) = serde_json::from_str::<Vec<serde_json::Value>>(fields) {
+          embed["fields"].as_array_mut().unwrap().extend(f);
+        }
+      }
+      embed["fields"].as_array_mut().unwrap().push(json!({
+        "name": "Kind",
+        "value": item.kind.to_string(),
+        "inline": true
+      }));
       if let Some(ref tag) = item.tag {
         embed["fields"].as_array_mut().unwrap().push(json!({
           "name": "Tag",

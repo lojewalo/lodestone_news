@@ -25,6 +25,7 @@ insertable! {
     pub title: String,
     pub url: String,
     pub description: Option<String>,
+    pub fields: Option<String>,
     pub image: Option<String>,
     pub lodestone_id: String,
     pub kind: NewsKind,

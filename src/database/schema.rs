@@ -4,6 +4,7 @@ table! {
         title -> Text,
         url -> Text,
         description -> Nullable<Text>,
+        fields -> Nullable<Text>,
         image -> Nullable<Text>,
         lodestone_id -> Text,
         kind -> SmallInt,
