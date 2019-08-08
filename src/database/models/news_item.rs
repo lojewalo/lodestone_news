@@ -99,7 +99,7 @@ impl<DB> Queryable<SmallInt, DB> for NewsKind
 }
 
 impl FromSql<SmallInt, Sqlite> for NewsKind {
-  fn from_sql(bytes: Option<&<Sqlite as Backend>::RawValue>) -> Result<Self, Box<Error + Send + Sync>> {
+  fn from_sql(bytes: Option<&<Sqlite as Backend>::RawValue>) -> Result<Self, Box<dyn Error + Send + Sync>> {
     let bytes = match bytes {
       Some(b) => b,
       None => return Err(box SqlError::new("unexpected null"))
@@ -116,8 +116,16 @@ impl<DB> FromSqlRow<SmallInt, DB> for NewsKind
   where DB: Backend + HasSqlType<SmallInt>,
         NewsKind: FromSql<SmallInt, DB>
 {
-  fn build_from_row<T: Row<DB>>(row: &mut T) -> Result<Self, Box<Error + Send + Sync>> {
+  fn build_from_row<T: Row<DB>>(row: &mut T) -> Result<Self, Box<dyn Error + Send + Sync>> {
     FromSql::from_sql(row.take())
+  }
+}
+
+impl AsExpression<SmallInt> for NewsKind {
+  type Expression = AsExprOf<i16, SmallInt>;
+
+  fn as_expression(self) -> Self::Expression {
+    AsExpression::as_expression(&self)
   }
 }
 

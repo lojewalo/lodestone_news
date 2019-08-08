@@ -11,7 +11,6 @@ use diesel::dsl::sql;
 use diesel::insert_into;
 
 use reqwest::Client;
-use reqwest::header::ContentType;
 
 use serde_json;
 
@@ -86,8 +85,7 @@ impl DiscordSender {
         "embeds": [embed]
       });
       let res = self.client.post(&server.url)
-        .header(ContentType::json())
-        .body(data.to_string())
+        .json(&data)
         .send();
       let mut data = match res {
         Ok(r) => r,

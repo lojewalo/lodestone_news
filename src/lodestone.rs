@@ -115,6 +115,7 @@ impl NewsScraper {
           continue;
         }
       };
+      let url = format!("https://na.finalfantasyxiv.com{}", href);
 
       let url = format!("https://na.finalfantasyxiv.com{}", href);
 

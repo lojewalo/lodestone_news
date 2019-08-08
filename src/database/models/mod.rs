@@ -50,7 +50,7 @@ impl Error for SqlError {
     "there was an sql error"
   }
 
-  fn cause(&self) -> Option<&Error> {
+  fn cause(&self) -> Option<&dyn Error> {
     None
   }
 }

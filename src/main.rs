@@ -88,12 +88,12 @@ fn main() {
   thread_handles.push(std::thread::spawn(move || {
     let scraper = lodestone::NewsScraper::new();
     loop {
+      if let Err(e) = scraper.update_news() {
+        warn!("Could not update Lodestone news: {}", e);
+      }
       chan_select! {
         ns_tick.recv() => {},
         ns_ts_rx.recv() => break,
-      }
-      if let Err(e) = scraper.update_news() {
-        warn!("Could not update Lodestone news: {}", e);
       }
     }
   }));
