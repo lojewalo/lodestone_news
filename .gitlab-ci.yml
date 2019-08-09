@@ -11,6 +11,7 @@ build:
       build-essential
       ca-certificates
       curl
+      libsqlite3-dev
       libssl-dev
       pkg-config
     - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly-2019-08-08
