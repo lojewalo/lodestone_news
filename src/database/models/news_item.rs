@@ -1,20 +1,27 @@
-use database::schema::*;
-
-use std::borrow::Borrow;
-use std::error::Error;
-
-use diesel::Queryable;
-use diesel::types::{FromSql, FromSqlRow, HasSqlType};
-use diesel::sql_types::SmallInt;
-use diesel::expression::AsExpression;
-use diesel::expression::helper_types::AsExprOf;
-use diesel::backend::Backend;
-use diesel::row::Row;
-use diesel::sqlite::Sqlite;
-
 use chrono::NaiveDateTime;
 
-use database::models::SqlError;
+use diesel::{
+  Queryable,
+  types::{FromSql, FromSqlRow, HasSqlType},
+  sql_types::SmallInt,
+  expression::{
+    AsExpression,
+    helper_types::AsExprOf,
+  },
+  backend::Backend,
+  row::Row,
+  sqlite::Sqlite,
+};
+
+use crate::database::{
+  models::SqlError,
+  schema::*,
+};
+
+use std::{
+  borrow::Borrow,
+  error::Error,
+};
 
 insertable! {
   #[derive(Debug, Queryable, Identifiable)]
@@ -30,7 +37,7 @@ insertable! {
     pub lodestone_id: String,
     pub kind: NewsKind,
     pub created: NaiveDateTime,
-    pub tag: Option<String>
+    pub tag: Option<String>,
   }
 }
 
@@ -38,7 +45,7 @@ insertable! {
 pub enum NewsKind {
   SpecialNotice,
   News,
-  Topic
+  Topic,
 }
 
 impl NewsKind {
@@ -66,7 +73,7 @@ impl NewsKind {
         "important" => return 0xd30c0c.into(),
         "recovery" => return 0x34d30c.into(),
         "follow-up" => return 0x0c80d3.into(),
-        _ => {}
+        _ => {},
       }
     }
     match *self {
@@ -82,7 +89,7 @@ impl ToString for NewsKind {
     match *self {
       NewsKind::News => "News",
       NewsKind::Topic => "Topic",
-      NewsKind::SpecialNotice => "Special notice"
+      NewsKind::SpecialNotice => "Special notice",
     }.to_string()
   }
 }
@@ -102,12 +109,12 @@ impl FromSql<SmallInt, Sqlite> for NewsKind {
   fn from_sql(bytes: Option<&<Sqlite as Backend>::RawValue>) -> Result<Self, Box<dyn Error + Send + Sync>> {
     let bytes = match bytes {
       Some(b) => b,
-      None => return Err(box SqlError::new("unexpected null"))
+      None => return Err(box SqlError::new("unexpected null")),
     };
     let u = bytes.read_integer() as i16;
     match NewsKind::from_i16(u) {
       Some(n) => Ok(n),
-      None => Err(box SqlError::new("unknown news kind"))
+      None => Err(box SqlError::new("unknown news kind")),
     }
   }
 }

@@ -1,11 +1,17 @@
 use ansi_term::Colour;
-use fern;
-use log::{Level, LevelFilter};
-use std::io;
-use chrono;
-use std::env::var;
 
-use errors::*;
+use chrono;
+
+use fern;
+
+use log::{Level, LevelFilter};
+
+use crate::errors::*;
+
+use std::{
+  io,
+  env::var,
+};
 
 fn colored_level(level: Level) -> String {
   let color = match level {
@@ -13,7 +19,7 @@ fn colored_level(level: Level) -> String {
     Level::Info => Colour::Blue,
     Level::Warn => Colour::Yellow,
     Level::Error => Colour::Red,
-    _ => return level.to_string()
+    _ => return level.to_string(),
   };
   color.paint(level.to_string()).to_string()
 }
@@ -39,11 +45,13 @@ fn colored_target(target: &str) -> String {
 pub fn init_logger() -> Result<()> {
   fern::Dispatch::new()
     .format(|out, message, record| {
-      out.finish(format_args!("[{}] [{}] {} – {}",
-                              chrono::Local::now().format("%H:%M:%S"),
-                              colored_level(record.level()),
-                              colored_target(record.target()),
-                              message))
+      out.finish(format_args!(
+        "[{}] [{}] {} – {}",
+        chrono::Local::now().format("%H:%M:%S"),
+        colored_level(record.level()),
+        colored_target(record.target()),
+        message,
+      ))
     })
     .level(if var("LN_DEBUG").is_ok() { LevelFilter::Debug } else { LevelFilter::Info })
     .chain(io::stdout())

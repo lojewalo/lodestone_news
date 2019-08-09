@@ -1,22 +1,25 @@
-use iter::NewsText;
+use chrono::NaiveDateTime;
+
+use diesel::{
+  dsl::count,
+  prelude::*,
+};
 
 use reqwest::Client;
 
 use scraper::{Html, Selector, ElementRef};
 
-use database::models::news_item::{NewsKind, NewNewsItem};
-use errors::*;
+use serde_derive::{Deserialize, Serialize};
 
-use diesel::prelude::*;
-use diesel::dsl::count;
-
-use chrono::NaiveDateTime;
-
-use serde_json;
+use crate::{
+  database::models::news_item::{NewsKind, NewNewsItem},
+  errors::*,
+  iter::NewsText,
+};
 
 use std::io::Read;
 
-const NEWS_URL: &'static str = "https://na.finalfantasyxiv.com/lodestone/news/";
+const NEWS_URL: &str = "https://na.finalfantasyxiv.com/lodestone/news/";
 
 pub struct NewsScraper {
   client: Client
@@ -44,8 +47,8 @@ impl NewsScraper {
   pub fn insert_new_news(items: Vec<NewNewsItem>) -> Result<()> {
     info!("Checking for new items");
     let new_ids: Vec<String> = items.iter().map(|x| x.lodestone_id.to_string()).collect();
-    let existing_ids: Vec<String> = ::CONNECTION.with(|c| {
-      use database::schema::news_items;
+    let existing_ids: Vec<String> = crate::CONNECTION.with(|c| {
+      use crate::database::schema::news_items;
       news_items::table.select(news_items::lodestone_id)
         .filter(news_items::lodestone_id.eq_any(&new_ids))
         .load(c)
@@ -58,9 +61,9 @@ impl NewsScraper {
       info!("No new items found");
       return Ok(());
     }
-    ::CONNECTION.with(|c| {
-      use database::schema::news_items;
-      ::diesel::insert_into(news_items::table)
+    crate::CONNECTION.with(|c| {
+      use crate::database::schema::news_items;
+      diesel::insert_into(news_items::table)
         .values(&new_items)
         .execute(c)
         .chain_err(|| "could not insert new items")
@@ -78,6 +81,7 @@ impl NewsScraper {
     Ok(content)
   }
 
+  #[allow(clippy::cognitive_complexity)]
   pub fn parse_news(&self, news: &str) -> Vec<NewNewsItem> {
     info!("Parsing news");
     let html = Html::parse_document(news);
@@ -104,8 +108,8 @@ impl NewsScraper {
         Some(c) => c,
         None => {
           warn!("could not get news item child");
-          continue
-        }
+          continue;
+        },
       };
 
       let href = match child.attr("href") {
@@ -113,7 +117,7 @@ impl NewsScraper {
         None => {
           warn!("invalid link in news item");
           continue;
-        }
+        },
       };
 
       let url = format!("https://na.finalfantasyxiv.com{}", href);
@@ -123,11 +127,11 @@ impl NewsScraper {
         None => {
           warn!("invalid href in news item");
           continue;
-        }
+        },
       };
 
-      let count: Result<i64> = ::CONNECTION.with(|c| {
-        use database::schema::news_items;
+      let count: Result<i64> = crate::CONNECTION.with(|c| {
+        use crate::database::schema::news_items;
         news_items::table.select(count(news_items::id))
           .filter(news_items::lodestone_id.eq(&id))
           .first(c)
@@ -140,7 +144,7 @@ impl NewsScraper {
           warn!("could not check if id was in database: {}", e);
           continue;
         },
-        _ => {}
+        _ => {},
       }
 
       let (title, tag, image, description, fields) = match kind {
@@ -150,7 +154,7 @@ impl NewsScraper {
             None => {
               warn!("missing title in news item");
               continue;
-            }
+            },
           };
 
           let tag: Option<String> = title.first_child()
@@ -170,7 +174,7 @@ impl NewsScraper {
             Err(e) => {
               warn!("could not parse fields: {}", e);
               continue;
-            }
+            },
           };
 
           let fields = match serde_json::to_string(&fields).chain_err(|| "could not serialize") {
@@ -178,7 +182,7 @@ impl NewsScraper {
             Err(e) => {
               warn!("could not parse/serialize fields: {}", e);
               continue;
-            }
+            },
           };
 
           (title, tag, None, desc, Some(fields))
@@ -198,7 +202,7 @@ impl NewsScraper {
             None => {
               warn!("invalid topic/special notice: no title");
               continue;
-            }
+            },
           }
         }
       };
@@ -208,7 +212,7 @@ impl NewsScraper {
         None => {
           warn!("news item missing time script");
           continue
-        }
+        },
       };
 
       let time_script: String = time_script.text().collect();
@@ -216,15 +220,15 @@ impl NewsScraper {
         Some(time) => time,
         None => {
           warn!("invalid script in news item");
-          continue
-        }
+          continue;
+        },
       };
       let time: i64 = match time_string.parse() {
         Ok(t) => t,
         Err(_) => {
           warn!("invalid time in time script");
-          continue
-        }
+          continue;
+        },
       };
       let datetime = NaiveDateTime::from_timestamp(time, 0);
 
@@ -237,7 +241,7 @@ impl NewsScraper {
         lodestone_id: id.to_string(),
         kind,
         created: datetime,
-        tag: tag.map(|x| x.trim().to_string())
+        tag: tag.map(|x| x.trim().to_string()),
       };
       items.push(news_item);
     }
@@ -288,5 +292,5 @@ impl NewsScraper {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Field {
   pub name: String,
-  pub value: String
+  pub value: String,
 }

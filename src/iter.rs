@@ -7,7 +7,7 @@ use std::borrow::Cow;
 pub struct NewsText<'a> {
   inner: Traverse<'a, Node>,
   separator: &'a str,
-  skipping: bool
+  skipping: bool,
 }
 
 impl<'a> NewsText<'a> {
@@ -15,7 +15,7 @@ impl<'a> NewsText<'a> {
     NewsText {
       inner,
       separator,
-      skipping: false
+      skipping: false,
     }
   }
 }
@@ -30,18 +30,18 @@ impl<'a> Iterator for NewsText<'a> {
           Node::Text(ref text) => {
             if node.ancestors().any(|a| match *a.value() {
               Node::Element(ref e) if e.name() == "a" => true,
-              _ => false
+              _ => false,
             }) {
               continue;
             }
-            return Some(Cow::Borrowed(&*text))
+            return Some(Cow::Borrowed(&*text));
           },
           Node::Element(ref e) if e.name() == "a" => {
             if let Some(href) = e.attr("href") {
               let text: String = ElementRef::wrap(node).unwrap().text().collect();
               return Some(Cow::Owned(format!("[{}]({})", text, href)));
             }
-          }
+          },
           Node::Element(ref e) if e.name() == "br" => {
             if self.skipping {
               continue;
@@ -49,11 +49,9 @@ impl<'a> Iterator for NewsText<'a> {
             self.skipping = true;
             return Some(Cow::Borrowed(self.separator));
           },
-          _ => {
-            if self.skipping {
-              self.skipping = false;
-            }
-          }
+          _ => if self.skipping {
+            self.skipping = false;
+          },
         }
       }
     }
