@@ -9,8 +9,10 @@ build:
     - >
       apt-get update && apt-get install -y --no-install-recommends
       build-essential
-      curl
       ca-certificates
+      curl
+      libssl-dev
+      pkg-config
     - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly-2019-08-08
   script:
     - /root/.cargo/bin/cargo build --release
